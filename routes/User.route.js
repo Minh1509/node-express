@@ -1,8 +1,30 @@
 const express = require('express');
 const route= express.Router();
+const User = require('../models/User.model');
+const createError = require('http-errors');
 
-route.post('/register', (req, res, next) => {
-    res.send('function register');
+route.post('/register',  async(req, res, next) => {
+    try{
+        
+        const {email, password} = req.body;
+        if(!email || !password) {
+            throw createError.BadRequest("tai khoan hoac mat khau trong");
+        }
+        const isExits = await User.findOne({username: email});
+        if(isExits) {
+            throw createError.Conflict("email bi trung");
+        }
+        const isCreate = await User.create({
+            username: email,
+            password
+        });
+        return res.json ({
+            status: "okey",
+            elements: isCreate
+        })
+    }catch(error) {
+        next(error);
+    }
 })
 route.post('/login', (req, res, next) => {
     res.send('function login');

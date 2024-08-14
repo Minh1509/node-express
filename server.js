@@ -8,6 +8,8 @@ app.get("/", (req, res, next) => {
   console.log("a:::", a);
   res.send("Homepage");
 });
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use("/user", UserRoute);
 app.use((req, res, next) => {
   //   const error = new Error("Not Found");
