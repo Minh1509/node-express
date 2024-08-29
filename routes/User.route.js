@@ -6,30 +6,34 @@ const {userValidation} = require('../helps/validation');
 
 route.post('/register', async (req, res, next) => {
     try {
-
-        const {email, password} = req.body;
+        const {email, password} = req.body ;
         const {error} = userValidation(req.body);
-
-        if (error) {
-            throw createError(error.details[0].message);
+        if(error) {
+            console.log("Error::", error);
+            throw createError.BadRequest(error.details[0].message);
+        } 
+        const isExit = await User.findOne({username: email});
+        if(isExit) {
+            throw createError.Conflict("Email is conflict");
         }
-        if (!email || !password) {
-            throw createError.BadRequest("tai khoan hoac mat khau trong");
-        }
-        const isExits = await User.findOne({username: email});
-        if (isExits) {
-            throw createError.Conflict("email bi trung");
-        }
-        const isCreate = await User.create({
+        const user = new User({
             username: email,
-            password
-        });
-        return res.json({
-            status: "okey",
-            elements: isCreate
+            password: password
         })
-    } catch (error) {
-        next(error);
+        const savedUser = await user.save();
+
+        // const user = await User.create({
+        //     username: email,
+        //     password: password
+        // })
+        
+        return res.json({
+            status: 200,
+            message: "Register success",
+            element: savedUser
+        })
+    }catch (err) {
+        next(err);
     }
 })
 route.post('/login', (req, res, next) => {
