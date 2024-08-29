@@ -36,8 +36,34 @@ route.post('/register', async (req, res, next) => {
         next(err);
     }
 })
-route.post('/login', (req, res, next) => {
-    res.send('function login');
+route.post('/login', async (req, res, next) => {
+    try {
+        const {email, password} = req.body;
+        const {error} = userValidation(req.body);
+        if(error) {
+            throw createError.BadRequest(error.details[0].message);
+        }
+
+        const user = await User.findOne({
+            username:email
+        });
+        if(!user) {
+            throw createError.NotFound("User not found");
+        }
+
+        const isValid = await user.isCheckPassword(password);
+        if(!isValid) {
+            throw createError.Unauthorized("Password is failed");
+        }
+        res.json({
+            status: 200,
+            message: "Login success",
+            element:user
+        });
+    } catch (error) {
+        next(error);
+    }
+   
 })
 route.post('/logout', (req, res, next) => {
     res.send('function logout');
