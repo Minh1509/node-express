@@ -25,4 +25,12 @@ UserSchema.pre('save', async function(next) {
         next(error);
     }
 })
+
+UserSchema.methods.isCheckPassword = async function(password) {
+    try {
+        return await bcrypt.compare(password, this.password);
+    } catch (error) {
+        next(error);
+    }
+}
 module.exports = ConnectionMongodb().model("User", UserSchema);
